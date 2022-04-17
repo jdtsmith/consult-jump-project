@@ -84,8 +84,8 @@ The returned list contains:
 	 (path (expand-file-name root))
 	 (bcount (length (consult--buffer-query :directory path)))
 	 (fcount 0) (mod 0))
-(require 'vc)    (seq-doseq (x recentf-list)
-      (when (string-prefix-p path x) 	; in this project
+    (seq-doseq (x recentf-list)
+      (when (string-prefix-p path x)	; in this project
 	(setq mod (max mod (float-time
 			    (file-attribute-modification-time
 			     (file-attributes x)))))
