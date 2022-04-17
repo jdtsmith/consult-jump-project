@@ -83,12 +83,12 @@ The returned list contains:
   (let* ((ht (consult--buffer-file-hash))
 	 (path (expand-file-name root))
 	 (bcount (length (consult--buffer-query :directory path)))
-	 (fcount 0) (mod 0))
+	 (fcount 0) (mod nil))
     (seq-doseq (x recentf-list)
       (when (string-prefix-p path x)	; in this project
-	(setq mod (max mod (float-time
-			    (file-attribute-modification-time
-			     (file-attributes x)))))
+	(unless mod (setq mod (float-time
+			       (file-attribute-modification-time
+				(file-attributes x)))))
 	(unless (gethash x ht) (cl-incf fcount))))
     (list root bcount fcount (- (float-time) mod))))
 
