@@ -2,6 +2,8 @@
 
 Quickly jump between projects, their files and buffers with [consult](https://github.com/minad/consult).
 
+<img width="520" alt="image" src="https://user-images.githubusercontent.com/93749/163687169-f244d194-84af-41c5-8214-75d846c8c65b.png">
+
 ```elisp
 ;; Consult-jump-project provides a single interactive command of the
 ;; same name which provides a narrowable list of project-related
