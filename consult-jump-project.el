@@ -150,12 +150,15 @@ files. Save details."
 						    :background ,vc-annotate-background))))
 	      ""))))
 
-(defun consult-jump-project ()
+(defun consult-jump-project (&optional arg)
   "Jump between projects, project files, and project buffers with consult.
-Consult-buffer with project buffers & files, plus a list of projects"
-  (interactive)
+Essentially consult-buffer's project buffers & files, plus an
+always-present list of projects with age and buffer/file count.
+Call with a prefix argument to disable display of project files
+and buffers."
+  (interactive "P")
   (consult-buffer
-   `(,@consult-project-buffer-sources
+   `(,@(unless arg consult-project-buffer-sources)
      (:name ,(concat (if (consult--project-root) "Other ") "Projects")
 	    ,@consult-jump-project--projects))))
 
