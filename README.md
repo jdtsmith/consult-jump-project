@@ -21,12 +21,28 @@ Quickly jump between projects, their files and buffers with [consult](https://gi
 ;; the abbreviated age of the newest of these is shown.
 ;;
 ;; Upon selecting a project, the interface is re-entered, allowing you
-;; to select of of its recent files of open buffers (or switch to yet
-;; another project).
+;; to select one of its recent files or open buffers, or to switch to
+;; yet another project.
 ;;
-;; Usage: simply bind `consult-jump-project` to a convenient key.
+;; Usage: simply bind `consult-jump-project` to a convenient key, e.g. C-x p j
 ;;
 ;; Inspiration from: consult, consult-project-extra.
 ```
 
-See also [consult-project-extra](https://github.com/Qkessler/consult-project-extra).
+## Install
+
+For now, simply use straight or a local `load-path` from a cloned directory:
+
+```elisp
+(use-package consult-jump-project
+  :load-path "~/code/emacs/consult-jump-project/"
+  ;; :straight (consult-jump-project :type git :host github :repo "jdtsmith/consult-jump-project")
+  :bind ("C-x p j" . consult-jump-project))
+```
+
+
+## Related Packages
+
+- [consult](https://github.com/minad/consult): required dependency
+- [consult-project-extra](https://github.com/Qkessler/consult-project-extra): Similar package from which this was inspired. Main differences are the color-coded "project age" and interface for selecting other projects, which is always available from the same interface. 
+

@@ -39,10 +39,10 @@
 ;; the abbreviated age of the newest of these is shown.
 ;;
 ;; Upon selecting a project, the interface is re-entered, allowing you
-;; to select of of its recent files of open buffers (or switch to yet
-;; another project).
+;; to select one of its recent files or open buffers, or to switch to
+;; yet another project.
 ;;
-;; Usage: simply bind `consult-jump-project` to a convenient key.
+;; Usage: simply bind `consult-jump-project` to a convenient key, e.g. C-x p j
 ;;
 ;; Inspiration from: consult, consult-project-extra.
 
@@ -111,10 +111,11 @@ The returned list contains:
   "Return list of (other) project roots.
 The list is sorted by last file mod date among recently saved
 files. Save details."
-  (let* ((projects (seq-filter (lambda (dir)
-				 (not (string-prefix-p
-				       (expand-file-name dir) default-directory)))
-			       (project-known-project-roots)))
+  (let* ((projects (seq-filter
+		    (lambda (dir)
+		      (not (string-prefix-p
+			    (expand-file-name dir) default-directory)))
+		    (project-known-project-roots)))
 	 (details (seq-map #'consult-jump-project--details projects)))
     (setq consult-jump-project--max-age
 	  (seq-max (seq-map (lambda (x) (nth 3 x)) details)))
