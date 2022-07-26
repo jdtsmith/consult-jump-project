@@ -1,11 +1,12 @@
-;;; consult-jump-project.el              -*- lexical-binding: t -*-
+;;; consult-jump-project.el --- Quickly jump between projects, their files and buffers with consult -*- lexical-binding: t -*-
+
 ;; Copyright (C) 2022  J.D. Smith
 
 ;; Author: J.D. Smith
 ;; Maintainer:  J.D. Smith <mail@daniel-mendler.de>
 ;; Created: 2022
 ;; Version: 0.1
-;; Package-Requires: ((emacs "27.1"))
+;; Package-Requires: ((emacs "27.1") (consult "0.18"))
 ;; Homepage: https://github.com/jdtsmith/consult-jump-project
 
 ;; This program is free software: you can redistribute it and/or modify
@@ -150,6 +151,7 @@ files. Save details."
 						    :background ,vc-annotate-background))))
 	      ""))))
 
+;;;###autoload
 (defun consult-jump-project (&optional arg)
   "Jump between projects, project files, and project buffers with consult.
 Essentially consult-buffer's project buffers & files, plus an
