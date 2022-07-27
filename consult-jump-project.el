@@ -112,12 +112,12 @@ The returned list contains:
   "Return list of (other) project roots.
 The list is sorted by last file mod date among recently saved
 files. Save details."
-  (let* ((projects (seq-filter
-		    (lambda (dir)
-		      (not (string-prefix-p
-			    (expand-file-name dir) default-directory)))
-		    (project-known-project-roots)))
-	 (details (seq-map #'consult-jump-project--details projects)))
+  (when-let ((projects (seq-filter
+			(lambda (dir)
+			  (not (string-prefix-p
+				(expand-file-name dir) default-directory)))
+			(project-known-project-roots)))
+	     (details (seq-map #'consult-jump-project--details projects)))
     (setq consult-jump-project--max-age
 	  (seq-max (seq-map (lambda (x) (nth 3 x)) details)))
     (seq-map #'car
