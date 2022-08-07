@@ -52,6 +52,15 @@
 (require 'vc-annotate)
 (require 'seq)
 
+(defgroup consult-jump-project nil
+  "Setup for consult jump project."
+  :group 'convenience
+  :prefix "consult-jump-project")
+
+(defcustom consult-jump-direct-jump-modes nil
+  "Commands from which consult-jump-project should directly jump to dired buffer."
+  :type '(list symbol))
+
 (defvar consult-jump-project--projects
   `(:narrow (?p . "Projects")
 	    :hidden nil
@@ -60,7 +69,7 @@
 	    :state ,#'consult--file-state
 	    :enabled  ,(lambda () consult-project-function)
 	    :annotate ,#'consult-jump-project--annotate
-	    :action ,(lambda (cand) (if cand (consult-jump-project)))
+	    :action ,#'consult-jump-project--action
 	    :items ,#'consult-jump-project--projects)
   "Consult-buffer source for project roots.")
 
@@ -73,6 +82,16 @@
     (?m "minute" "minutes" 60)
     (?s "second" "seconds" 1))
   "Age specification. See `magit--age-spec', which this duplicates.")
+
+
+(defun consult-jump-project--action (cand)
+  "Consult buffer action."
+  (if (and cand
+	   consult-jump-project--original-buffer
+	   (with-current-buffer consult-jump-project--original-buffer
+	     (cl-notany (lambda (x) (derived-mode-p x))
+			consult-jump-direct-jump-modes)))
+      (consult-jump-project)))
 
 (defun consult-jump-project--details (root)
   "Return details for the given project ROOT.
@@ -151,18 +170,21 @@ files. Save details."
 						    :background ,vc-annotate-background))))
 	      ""))))
 
+(defvar consult-jump-project--original-buffer nil)
+
 ;;;###autoload
 (defun consult-jump-project (&optional arg)
   "Jump between projects, project files, and project buffers with consult.
 Essentially consult-buffer's project buffers & files, plus an
 always-present list of projects with age and buffer/file count.
 Call with a prefix argument to disable display of project files
-and buffers."
+and buffers, and display only (other) projects."
   (interactive "P")
-  (consult-buffer
-   `(,@(unless arg consult-project-buffer-sources)
-     (:name ,(concat (if (consult--project-root) "Other ") "Projects")
-	    ,@consult-jump-project--projects))))
+  (let ((consult-jump-project--original-buffer (current-buffer)))
+    (consult-buffer
+     `(,@(unless arg consult-project-buffer-sources)
+       (:name ,(concat (if (consult--project-root) "Other ") "Projects")
+	      ,@consult-jump-project--projects)))))
 
 (provide 'consult-jump-project)
 
