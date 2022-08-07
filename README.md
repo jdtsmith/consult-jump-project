@@ -51,6 +51,8 @@ For now, simply use straight or a local `load-path` from a cloned directory:
 
 Customize the variable `consult-jump-direct-jump-modes` to a list of modes (symbols) from which to jump directly to the project's dired buffer, if a project is selected, rather than prompting for files/buffers from that project.  E.g. `(dired)` would indicate that invoking jump from a dired buffer and selecting a project would go directly to the project's dired buffer.
 
+`vc-annotate-background` and `vc-annotate-color-map` can be used to alter project age coloration.
+
 ## Related Packages
 
 - [consult](https://github.com/minad/consult): required dependency
