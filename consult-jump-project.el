@@ -63,14 +63,14 @@
 
 (defvar consult-jump-project--projects
   `(:narrow (?p . "Projects")
-	    :hidden nil
-	    :category 'file
-	    :face consult-file
-	    :state ,#'consult--file-state
-	    :enabled  ,(lambda () consult-project-function)
-	    :annotate ,#'consult-jump-project--annotate
-	    :action ,#'consult-jump-project--action
-	    :items ,#'consult-jump-project--projects)
+    :hidden nil
+    :category file
+    :face consult-file
+    :state ,#'consult--file-state
+    :enabled  ,(lambda () consult-project-function)
+    :annotate ,#'consult-jump-project--annotate
+    :action ,#'consult-jump-project--action
+    :items ,#'consult-jump-project--projects)
   "Consult-buffer source for project roots.")
 
 (defvar consult-jump-project--age-spec
