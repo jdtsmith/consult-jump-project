@@ -44,14 +44,17 @@ For now, simply use straight or a local `load-path` from a cloned directory:
 (use-package consult-jump-project
   :load-path "~/code/emacs/consult-jump-project/"
   ;; :straight (consult-jump-project :type git :host github :repo "jdtsmith/consult-jump-project")
+  :custom (consult-jump-direct-jump-modes '(dired-mode))
   :bind ("C-x p j" . consult-jump-project))
 ```
 
 ## Customization
 
-Customize the variable `consult-jump-direct-jump-modes` to a list of modes (symbols) from which to jump directly to the project's dired buffer, if a project is selected, rather than prompting for files/buffers from that project.  E.g. `(dired)` would indicate that invoking jump from a dired buffer and selecting a project would go directly to the project's dired buffer.
+Customize the variable `consult-jump-direct-jump-modes` to a list of modes (symbols) from which to jump directly to the project's dired buffer, if a project is selected, rather than prompting for files/buffers from that project to visit.  
 
-`vc-annotate-background` and `vc-annotate-color-map` can be used to alter project age coloration.
+E.g. `(dired-mode)` would indicate that invoking jump from a dired buffer and selecting a project would go directly to the project's dired buffer.
+
+`vc-annotate-background` and `vc-annotate-color-map` can be used to alter project age coloration.  Set the former to `nil` to remove the background color from the age. 
 
 ## Related Packages
 
