@@ -83,15 +83,16 @@
     (?s "second" "seconds" 1))
   "Age specification. See `magit--age-spec', which this duplicates.")
 
-
 (defun consult-jump-project--action (cand)
   "Consult buffer action."
-  (if (and cand
-	   consult-jump-project--original-buffer
-	   (with-current-buffer consult-jump-project--original-buffer
-	     (cl-notany (lambda (x) (derived-mode-p x))
-			consult-jump-direct-jump-modes)))
-      (consult-jump-project)))
+  (when (and cand
+	     consult-jump-project--original-buffer
+	     (with-current-buffer
+		 consult-jump-project--original-buffer
+	       (cl-notany
+		(lambda (x) (derived-mode-p x))
+		consult-jump-direct-jump-modes)))
+    (consult-jump-project)))
 
 (defun consult-jump-project--details (root)
   "Return details for the given project ROOT.
@@ -110,7 +111,7 @@ The returned list contains:
 			       (file-attribute-modification-time
 				(file-attributes x)))))
 	(unless (gethash x ht) (cl-incf fcount))))
-    (list root bcount fcount (- (float-time) mod))))
+    (list root bcount fcount (if mod (- (float-time) mod)))))
 
 (defun consult-jump-project--age (age &optional abbreviate)
   "Adapted from `magit--age'."
@@ -138,11 +139,11 @@ files. Save details."
 			(project-known-project-roots)))
 	     (details (seq-map #'consult-jump-project--details projects)))
     (setq consult-jump-project--max-age
-	  (seq-max (seq-map (lambda (x) (nth 3 x)) details)))
+	  (seq-max (delq nil (seq-map (lambda (x) (nth 3 x)) details))))
     (seq-map #'car
 	     (setq consult-jump-project--details
 		   (sort details (lambda (a b)
-				   (or (not (nth 3 b))
+				   (or (not (nth 3 b)) (not (nth 3 a))
 				       (< (nth 3 a) (nth 3 b)))))))))
 
 (defconst consult-jump-project--oldest
