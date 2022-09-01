@@ -64,7 +64,7 @@
 (defvar consult-jump-project--projects
   `(:narrow (?p . "Projects")
     :hidden nil
-    :category file
+    :category project
     :face consult-file
     :state ,#'consult--file-state
     :enabled  ,(lambda () consult-project-function)
