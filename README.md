@@ -59,5 +59,5 @@ E.g. `(dired-mode)` would indicate that invoking jump from a dired buffer and se
 ## Related Packages
 
 - [consult](https://github.com/minad/consult): required dependency
-- [consult-project-extra](https://github.com/Qkessler/consult-project-extra): Similar package from which this was inspired. Main differences are the color-coded "project age" and interface for selecting other projects, which is always available from the same interface. 
+- [consult-project-extra](https://github.com/Qkessler/consult-project-extra): Similar package from which this was inspired. Main differences are the color-coded "project age" and the project selection, which is always available from the same interface. 
 
