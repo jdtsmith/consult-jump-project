@@ -139,7 +139,8 @@ files. Save details."
 			(project-known-project-roots)))
 	     (details (seq-map (lambda (x) (consult-jump-project--details x ht)) projects)))
     (setq consult-jump-project--max-age
-	  (seq-max (delq nil (seq-map (lambda (x) (nth 3 x)) details))))
+	  (when-let ((ages (delq nil (seq-map (lambda (x) (nth 3 x)) details))))
+	    (seq-max ages)))
     (seq-map #'car
 	     (setq consult-jump-project--details
 		   (sort details (lambda (a b)
