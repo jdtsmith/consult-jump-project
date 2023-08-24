@@ -105,7 +105,8 @@ The returned list contains:
 	 (bcount (length (consult--buffer-query :directory path)))
 	 (fcount 0) (mod nil))
     (seq-doseq (x recentf-list)
-      (when (string-prefix-p path x)	; in this project
+      (when
+	  (string-prefix-p path (expand-file-name x))	; in this project
 	(unless mod (setq mod (float-time
 			       (file-attribute-modification-time
 				(file-attributes x)))))
