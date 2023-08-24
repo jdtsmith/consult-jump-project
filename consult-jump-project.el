@@ -85,7 +85,7 @@
 
 (defun consult-jump-project--action (cand)
   "Consult buffer action."
-  (when (and cand
+  (if (and cand
 	     consult-jump-project--original-buffer
 	     (with-current-buffer
 		 consult-jump-project--original-buffer
