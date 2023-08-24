@@ -94,15 +94,14 @@
 		consult-jump-direct-jump-modes)))
     (consult-jump-project)))
 
-(defun consult-jump-project--details (root)
-  "Return details for the given project ROOT.
+(defun consult-jump-project--details (root ht)
+  "Return details for the given project ROOT given the consult hash table HT.
 The returned list contains:
   (root
    #buffers
    #recent files
    time (seconds) elapsed since last modification of recent project files)."
-  (let* ((ht (consult--buffer-file-hash))
-	 (path (expand-file-name root))
+  (let* ((path (expand-file-name root))
 	 (bcount (length (consult--buffer-query :directory path)))
 	 (fcount 0) (mod nil))
     (seq-doseq (x recentf-list)
@@ -132,12 +131,13 @@ The returned list contains:
   "Return list of (other) project roots.
 The list is sorted by last file mod date among recently saved
 files. Save details."
-  (when-let ((projects (seq-filter
+  (when-let ((ht (consult--buffer-file-hash))
+	     (projects (seq-filter
 			(lambda (dir)
 			  (not (string-prefix-p
 				(expand-file-name dir) default-directory)))
 			(project-known-project-roots)))
-	     (details (seq-map #'consult-jump-project--details projects)))
+	     (details (seq-map (lambda (x) (consult-jump-project--details x ht)) projects)))
     (setq consult-jump-project--max-age
 	  (seq-max (delq nil (seq-map (lambda (x) (nth 3 x)) details))))
     (seq-map #'car
