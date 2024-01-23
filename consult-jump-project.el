@@ -1,4 +1,4 @@
-;;; consult-jump-project.el --- Quickly jump between projects, their files and buffers with consult -*- lexical-binding: t -*-
+;;; consult-jump-project.el --- Quickly jump between projects files and buffers -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2022  J.D. Smith
 
@@ -6,7 +6,7 @@
 ;; Maintainer:  J.D. Smith <mail@daniel-mendler.de>
 ;; Created: 2022
 ;; Version: 0.1
-;; Package-Requires: ((emacs "27.1") (consult "0.18"))
+;; Package-Requires: ((emacs "28.1") (consult "0.18"))
 ;; Homepage: https://github.com/jdtsmith/consult-jump-project
 
 ;; This program is free software: you can redistribute it and/or modify
@@ -35,7 +35,7 @@
 ;; If the file from which consult-jump-project is invoked is not in
 ;; any project, you are prompted only with the full list of projects
 ;; known to Emacs (via project.el).  While selecting projects, a
-;; preview is provided in the form of a dired buffer visiting its
+;; preview is provided in the form of a Dired buffer visiting its
 ;; root.  Information on the number of recent files and buffers, and
 ;; the abbreviated age of the newest of these is shown.
 ;;
@@ -51,14 +51,15 @@
 (require 'consult)
 (require 'vc-annotate)
 (require 'seq)
+(require 'recentf)
 
 (defgroup consult-jump-project nil
   "Setup for consult jump project."
   :group 'convenience
   :prefix "consult-jump-project")
 
-(defcustom consult-jump-direct-jump-modes nil
-  "Commands from which consult-jump-project should directly jump to dired buffer."
+(defcustom consult-jump-project-direct-jump-modes nil
+  "Commands from which `consult-jump-project' should directly jump to Dired buffer."
   :type '(list symbol))
 
 (defvar consult-jump-project--projects
@@ -81,21 +82,23 @@
     (?h "hour"   "hours"   ,(* 60 60))
     (?m "minute" "minutes" 60)
     (?s "second" "seconds" 1))
-  "Age specification. See `magit--age-spec', which this duplicates.")
+  "Age specification.  See `magit--age-spec', which this duplicates.")
+
+(defvar consult-jump-project--original-buffer nil)
 
 (defun consult-jump-project--action (cand)
-  "Consult buffer action."
+  "Consult buffer action for candidate CAND."
   (if (and cand
 	     consult-jump-project--original-buffer
 	     (with-current-buffer
 		 consult-jump-project--original-buffer
 	       (cl-notany
 		(lambda (x) (derived-mode-p x))
-		consult-jump-direct-jump-modes)))
+		consult-jump-project-direct-jump-modes)))
     (consult-jump-project)))
 
 (defun consult-jump-project--details (root ht)
-  "Return details for the given project ROOT given the consult hash table HT.
+  "Return details for the given project ROOT and consult hash table HT.
 The returned list contains:
   (root
    #buffers
@@ -114,24 +117,25 @@ The returned list contains:
     (list root bcount fcount (if mod (- (float-time) mod)))))
 
 (defun consult-jump-project--age (age &optional abbreviate)
-  "Adapted from `magit--age'."
+  "Summarize AGE and possibly ABBREVIATE.
+Adapted from `magit--age'."
   (cl-labels ((fn (age spec)
-                  (pcase-let ((`(,char ,unit ,units ,weight) (car spec)))
-                    (let ((cnt (round (/ age weight 1.0))))
-                      (if (or (not (cdr spec))
-                              (>= (/ age weight) 1))
-                          (list cnt (cond (abbreviate char)
-                                          ((= cnt 1) unit)
-                                          (t units)))
-                        (fn age (cdr spec)))))))
+                (pcase-let ((`(,char ,unit ,units ,weight) (car spec)))
+                  (let ((cnt (round (/ age weight 1.0))))
+                    (if (or (not (cdr spec))
+                            (>= (/ age weight) 1))
+                        (list cnt (cond (abbreviate char)
+                                        ((= cnt 1) unit)
+                                        (t units)))
+                      (fn age (cdr spec)))))))
     (fn age consult-jump-project--age-spec)))
-
 (defvar consult-jump-project--details nil)
 (defvar consult-jump-project--max-age nil)
+
 (defun consult-jump-project--projects ()
   "Return list of (other) project roots.
 The list is sorted by last file mod date among recently saved
-files. Save details."
+files.  Save details."
   (when-let ((ht (consult--buffer-file-hash))
 	     (projects (seq-filter
 			(lambda (dir)
@@ -152,6 +156,7 @@ files. Save details."
   (vc-annotate-oldest-in-map vc-annotate-color-map))
 
 (defun consult-jump-project--annotate (root)
+  "Annotate ROOT project for display."
   (pcase-let ((`(_ ,bcount ,fcount ,age)
 	       (assoc root consult-jump-project--details)))
     (format "%2s recent file%s %2s buffer%s%s"
@@ -173,15 +178,13 @@ files. Save details."
 						    :background ,vc-annotate-background))))
 	      ""))))
 
-(defvar consult-jump-project--original-buffer nil)
-
 ;;;###autoload
 (defun consult-jump-project (&optional arg)
   "Jump between projects, project files, and project buffers with consult.
 Essentially consult-buffer's project buffers & files, plus an
 always-present list of projects with age and buffer/file count.
-Call with a prefix argument to disable display of project files
-and buffers, and display only (other) projects."
+Call with a prefix argument ARG to disable display of project
+files and buffers, and display only (other) projects."
   (interactive "P")
   (let ((consult-jump-project--original-buffer (current-buffer)))
     (consult-buffer
