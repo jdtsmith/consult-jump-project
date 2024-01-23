@@ -4,8 +4,8 @@
 
 ;; Author: J.D. Smith
 ;; Maintainer:  J.D. Smith <mail@daniel-mendler.de>
-;; Created: 2022
-;; Version: 0.1
+;; Created: 2022-2023
+;; Version: 0.1.1
 ;; Package-Requires: ((emacs "28.1") (consult "0.18"))
 ;; Homepage: https://github.com/jdtsmith/consult-jump-project
 
