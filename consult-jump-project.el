@@ -149,8 +149,9 @@ files.  Save details."
     (seq-map #'car
 	     (setq consult-jump-project--details
 		   (sort details (lambda (a b)
-				   (or (not (nth 3 b)) (not (nth 3 a))
-				       (< (nth 3 a) (nth 3 b)))))))))
+				   (cond ((not (nth 3 a)) nil)
+					 ((not (nth 3 b)) t)
+					 (t (< (nth 3 a) (nth 3 b))))))))))
 
 (defconst consult-jump-project--oldest
   (vc-annotate-oldest-in-map vc-annotate-color-map))
