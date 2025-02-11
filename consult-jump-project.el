@@ -97,6 +97,7 @@
 		consult-jump-project-direct-jump-modes)))
     (consult-jump-project)))
 
+(declare-function tramp-connectable-p "tramp")
 (defun consult-jump-project--details (root ht)
   "Return details for the given project ROOT and consult hash table HT.
 The returned list contains:
@@ -104,17 +105,22 @@ The returned list contains:
    #buffers
    #recent files
    time (seconds) elapsed since last modification of recent project files)."
-  (let* ((path (expand-file-name root))
-	 (bcount (length (consult--buffer-query :directory path)))
-	 (fcount 0) (mod nil))
-    (seq-doseq (x recentf-list)
-      (when
-	  (string-prefix-p path (expand-file-name x))	; in this project
-	(unless mod (setq mod (float-time
-			       (file-attribute-modification-time
-				(file-attributes x)))))
-	(unless (gethash x ht) (cl-incf fcount))))
-    (list root bcount fcount (if mod (- (float-time) mod)))))
+  (if (and (file-remote-p root) (fboundp 'tramp-connectable-p)
+	   (not (let ((non-essential t)) (tramp-connectable-p root))))
+      ;; Only access remote roots if already connected.
+      (list root nil nil nil)
+    (let* ((proj-path (expand-file-name root))
+	   (bcount (length (consult--buffer-query :directory proj-path)))
+	   (fcount 0) (mod nil))
+      (seq-doseq (x recentf-list)
+	;; avoid file-in-directory-p as it is slow
+	(when (string-prefix-p proj-path (expand-file-name x)) ; in this project
+	  ;; Take the modification time of the *first* recentf file
+	  ;; in the project (they are sorted most recent first).
+	  (unless mod (setq mod (file-attribute-modification-time
+				 (file-attributes x))))
+	  (unless (gethash x ht) (cl-incf fcount))))
+      (list root bcount fcount (and mod (float-time (time-since mod)))))))
 
 (defun consult-jump-project--age (age &optional abbreviate)
   "Summarize AGE and possibly ABBREVIATE.
@@ -160,24 +166,26 @@ files.  Save details."
   "Annotate ROOT project for display."
   (pcase-let ((`(_ ,bcount ,fcount ,age)
 	       (assoc root consult-jump-project--details)))
-    (format "%2s recent file%s %2s buffer%s%s"
-	    (propertize (format "%d" fcount) 'face 'consult-key)
-	    (if (= fcount 1) " " "s")
-	    (propertize (format "%d" bcount) 'face 'consult-key)
-	    (if (= bcount 1) " " "s")
-	    (if age
-		(pcase-let* ((`(,cnt ,unit) (consult-jump-project--age age))
-			     (ago (format "[%d %s]" cnt unit))
-			     (color (or (cdr (vc-annotate-compcar
-					      (* (/ age consult-jump-project--max-age)
-						 consult-jump-project--oldest)
-					      vc-annotate-color-map))
-					vc-annotate-very-old-color)))
-		  (format " %12s"
-			  (propertize ago 'face
-				      `(:foreground ,color
-						    :background ,vc-annotate-background))))
-	      ""))))
+    (if (not (and bcount fcount))
+	(propertize "unconnected remote" 'face 'warn)
+      (format "%2s recent file%s %2s buffer%s%s"
+	      (propertize (format "%d" fcount) 'face 'consult-key)
+	      (if (= fcount 1) " " "s")
+	      (propertize (format "%d" bcount) 'face 'consult-key)
+	      (if (= bcount 1) " " "s")
+	      (if age
+		  (pcase-let* ((`(,cnt ,unit) (consult-jump-project--age age))
+			       (ago (format "[%d %s]" cnt unit))
+			       (color (or (cdr (vc-annotate-compcar
+						(* (/ age consult-jump-project--max-age)
+						   consult-jump-project--oldest)
+						vc-annotate-color-map))
+					  vc-annotate-very-old-color)))
+		    (format " %12s"
+			    (propertize ago 'face
+					`(:foreground ,color
+						      :background ,vc-annotate-background))))
+		"")))))
 
 ;;;###autoload
 (defun consult-jump-project (&optional arg)
