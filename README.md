@@ -44,8 +44,12 @@ For now, simply use straight or a local `load-path` from a cloned directory:
 (use-package consult-jump-project
   :load-path "~/code/emacs/consult-jump-project/"
   ;; :straight (consult-jump-project :type git :host github :repo "jdtsmith/consult-jump-project")
-  :custom (consult-jump-direct-jump-modes '(dired-mode))
-  :bind ("C-x p j" . consult-jump-project))
+  :custom 
+  (consult-jump-direct-jump-modes '(dired-mode))
+  (recentf-filename-handlers (lambda (f)  ; avoid remote ~/abbreviations to recentf files can be matched
+			       (if (file-remote-p f) f
+				 (abbreviate-file-name f)))) 
+  :bind ("C-x p p" . consult-jump-project))
 ```
 
 ## Customization
