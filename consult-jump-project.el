@@ -146,7 +146,8 @@ files.  Save details."
 	     (projects (seq-filter
 			(lambda (dir)
 			  (not (string-prefix-p
-				(expand-file-name dir) default-directory)))
+				(if (file-remote-p dir) dir (expand-file-name dir))
+				default-directory)))
 			(project-known-project-roots)))
 	     (details (seq-map (lambda (x) (consult-jump-project--details x ht)) projects)))
     (setq consult-jump-project--max-age
