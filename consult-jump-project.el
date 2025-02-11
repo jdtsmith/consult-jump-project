@@ -198,7 +198,8 @@ files and buffers, and display only (other) projects."
   (interactive "P")
   (let ((consult-jump-project--original-buffer (current-buffer)))
     (consult-buffer
-     `(,@(unless arg consult-project-buffer-sources)
+     `(,@(unless arg (remove 'consult--source-project-root
+			     consult-project-buffer-sources))
        (:name ,(concat (if (consult--project-root) "Other ") "Projects")
 	      ,@consult-jump-project--projects)))))
 
