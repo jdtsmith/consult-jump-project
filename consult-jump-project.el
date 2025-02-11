@@ -52,6 +52,7 @@
 (require 'vc-annotate)
 (require 'seq)
 (require 'recentf)
+(require 'tramp)
 
 (defgroup consult-jump-project nil
   "Setup for consult jump project."
@@ -137,12 +138,22 @@ Adapted from `magit--age'."
 The list is sorted by last file mod date among recently saved
 files.  Save details."
   (when-let ((ht (consult--buffer-file-hash))
-	     (projects (seq-filter
-			(lambda (dir)
-			  (not (string-prefix-p
-				(expand-file-name dir) default-directory)))
-			(project-known-project-roots)))
-	     (details (seq-map (lambda (x) (consult-jump-project--details x ht)) projects)))
+              (all-active-remote-projects (cl-map 'list (lambda (p)
+                                                          (substring-no-properties (tramp-make-tramp-file-name p)))
+                                                  (tramp-list-connections)))
+	      (projects (seq-filter
+		         (lambda (dir)
+		           (not (string-prefix-p
+			         (if (file-remote-p dir) dir (expand-file-name dir)) default-directory)))
+		         (seq-filter (lambda (p)
+                                       ;; otherwise tramp will try to connect to remote projects that we might not have connected to yet
+                                       (or (not (file-remote-p p))
+                                           (cl-find-if (lambda (remote-proj) (string-prefix-p remote-proj p))
+                                                       all-active-remote-projects)))
+                                     (project-known-project-roots))))
+	      (details (seq-map (lambda (x)
+                                  (consult-jump-project--details x ht))
+                                projects)))
     (setq consult-jump-project--max-age
 	  (when-let ((ages (delq nil (seq-map (lambda (x) (nth 3 x)) details))))
 	    (seq-max ages)))
