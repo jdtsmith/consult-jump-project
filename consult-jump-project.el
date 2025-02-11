@@ -1,11 +1,11 @@
 ;;; consult-jump-project.el --- Quickly jump between projects files and buffers -*- lexical-binding: t -*-
 
-;; Copyright (C) 2022  J.D. Smith
+;; Copyright (C) 2022-2025  J.D. Smith
 
 ;; Author: J.D. Smith
-;; Maintainer:  J.D. Smith <mail@daniel-mendler.de>
-;; Created: 2022-2023
-;; Version: 0.1.1
+;; Maintainer:  J.D. Smith <jdtsmith+consult-jump-project@gmail.com>
+;; Created: 2022
+;; Version: 0.1.2
 ;; Package-Requires: ((emacs "28.1") (consult "0.18"))
 ;; Homepage: https://github.com/jdtsmith/consult-jump-project
 
