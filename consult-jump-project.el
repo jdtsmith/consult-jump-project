@@ -188,45 +188,6 @@ files.  Save details."
 						      :background ,vc-annotate-background))))
 		"")))))
 
-(defun consult-jump-project--multi-state (sources)
-  "Avoid previewing unconnected remote buffers from SOURCES.
-This is basically a copy of `consult--multi-state'."
-  (when-let (states (delq nil (mapcar (lambda (src)
-                                        (when-let (fun (plist-get src :state))
-                                          (cons src (funcall fun))))
-                                      sources)))
-    (let (last-fun)
-      (pcase-lambda (action `(,cand . ,src))
-        (pcase action
-          ('setup
-           (pcase-dolist (`(,_ . ,fun) states)
-             (funcall fun 'setup nil)))
-          ('exit
-           (pcase-dolist (`(,_ . ,fun) states)
-             (funcall fun 'exit nil)))
-          ('preview
-           (let ((selected-fun (cdr (assq src states))))
-             ;; If the candidate source changed during preview communicate to
-             ;; the last source, that none of its candidates is previewed anymore.
-             (when (and last-fun (not (eq last-fun selected-fun)))
-               (funcall last-fun 'preview nil))
-             (setq last-fun selected-fun)
-             ;; this additional tramp-connectable-p check is the only difference between this and consult--multi-state
-             (when (and selected-fun (or (get-buffer cand)
-                                         (not (file-remote-p cand))
-                                         (and (fboundp 'tramp-connectable-p)
-                                              (let ((non-essential t)) (tramp-connectable-p cand)))))
-               (funcall selected-fun 'preview cand))))
-          ('return
-           (let ((selected-fun (cdr (assq src states))))
-             ;; Finish all the sources, except the selected one.
-             (pcase-dolist (`(,_ . ,fun) states)
-               (unless (eq fun selected-fun)
-                 (funcall fun 'return nil)))
-             ;; Finish the source with the selected candidate
-             (when selected-fun
-               (funcall selected-fun 'return cand)))))))))
-
 ;;;###autoload
 (defun consult-jump-project (&optional arg)
   "Jump between projects, project files, and project buffers with consult.
@@ -235,26 +196,12 @@ always-present list of projects with age and buffer/file count.
 Call with a prefix argument ARG to disable display of project
 files and buffers, and display only (other) projects."
   (interactive "P")
-  ;; this is copied from consult-buffer but with our custom :state function passed in
-  (let* ((consult-jump-project--original-buffer (current-buffer))
-         (sources `(,@(unless arg (remove 'consult--source-project-root
-			                  consult-project-buffer-sources))
-                    (:name ,(concat (if (consult--project-root) "Other ") "Projects")
-	                   ,@consult-jump-project--projects))))
-    (let ((selected (consult--multi (or sources consult-buffer-sources)
-                                    :require-match
-                                    (confirm-nonexistent-file-or-buffer)
-                                    :prompt "Switch to: "
-                                    :history 'consult--buffer-history
-                                    :sort nil
-                                    :state (consult-jump-project--multi-state sources)
-                                    )))
-      ;; For non-matching candidates, fall back to buffer creation.
-      (unless (plist-get (cdr selected) :match)
-        (consult--buffer-action (car selected))))
-    )
-  )
-
+  (let ((consult-jump-project--original-buffer (current-buffer)))
+    (consult-buffer
+     `(,@(unless arg (remove 'consult--source-project-root
+			     consult-project-buffer-sources))
+       (:name ,(concat (if (consult--project-root) "Other ") "Projects")
+	      ,@consult-jump-project--projects)))))
 
 (provide 'consult-jump-project)
 
