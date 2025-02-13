@@ -106,7 +106,7 @@ The returned list contains:
    #recent files
    time (seconds) elapsed since last modification of recent project files)."
   (if (and (file-remote-p root) (fboundp 'tramp-connectable-p)
-	   (not (let ((non-essential t)) (tramp-connectable-p root))))
+	   (not (tramp-connectable-p root)))
       ;; Only access remote roots if already connected.
       (list root nil nil nil)
     (let* ((proj-path (expand-file-name root))
