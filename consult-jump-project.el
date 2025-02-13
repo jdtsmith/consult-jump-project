@@ -196,7 +196,8 @@ always-present list of projects with age and buffer/file count.
 Call with a prefix argument ARG to disable display of project
 files and buffers, and display only (other) projects."
   (interactive "P")
-  (let ((consult-jump-project--original-buffer (current-buffer)))
+  (let ((consult-jump-project--original-buffer (current-buffer))
+        (non-essential t))
     (consult-buffer
      `(,@(unless arg (remove 'consult--source-project-root
 			     consult-project-buffer-sources))
